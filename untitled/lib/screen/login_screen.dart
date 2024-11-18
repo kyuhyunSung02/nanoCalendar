@@ -1,5 +1,6 @@
 // screens/login_screen.dart
 import 'package:flutter/material.dart';
+import 'package:untitled/screen/home_screen.dart';
 import '../widgets/custom_button.dart'; // 커스텀 버튼을 사용하기 위해 불러옵니다.
 
 class LoginScreen extends StatelessWidget {
@@ -50,7 +51,10 @@ class LoginScreen extends StatelessWidget {
                 text: "Login", // 버튼 텍스트
                 color: const Color(0xFF1976D2), // 버튼 배경색
                 onPressed: () {
-                  // 로그인 기능 추가
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const HomeScreen())
+                  );
                 },
               ),
               const SizedBox(height: 10),
