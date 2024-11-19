@@ -1,40 +1,41 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:untitled/screen/home_screen.dart';
-import 'package:untitled/screen/signup_screen.dart';
-import 'package:untitled/screen/find_passwd.dart';
 import '../widgets/custom_button.dart';
+import 'login_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
-  userLogin() async {
+  void registration() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim());
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Registration Successful")));
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => SignUpScreen()));
+          context, MaterialPageRoute(builder: (context) => LoginScreen()));
     } on FirebaseAuthException catch (e) {
-      String errorMessage = "An error occurred";
-      if (e.code == 'user-not-found') {
-        errorMessage = "No user found with this email";
-      } else if (e.code == 'wrong-password') {
-        errorMessage = "Wrong password";
+      String errorMessage = "Registration failed";
+      if (e.code == 'weak-password') {
+        errorMessage = "Password is too weak";
+      } else if (e.code == 'email-already-in-use') {
+        errorMessage = "Account already exists";
       }
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(errorMessage)));
@@ -49,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Welcome to Nano Calendar"),
+        title: const Text("Sign Up"),
         backgroundColor: const Color(0xFF1976D2),
       ),
       body: Center(
@@ -65,6 +66,22 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 150,
                 ),
                 const SizedBox(height: 20),
+                TextFormField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    labelText: "Name",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your name';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 10),
                 TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(
@@ -102,40 +119,29 @@ class _LoginScreenState extends State<LoginScreen> {
                   const CircularProgressIndicator()
                 else
                   CustomButton(
-                    text: "Login",
+                    text: "Sign Up",
                     color: const Color(0xFF1976D2),
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        userLogin();
+                        registration();
                       }
                     },
                   ),
                 const SizedBox(height: 10),
-                CustomButton(
-                  text: "Sign Up",
-                  color: Colors.white,
-                  textColor: Colors.black,
-                  borderColor: Colors.black,
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => SignUpScreen()),
-                    );
-                  },
-                ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => FindPasswordScreen()),
-                    );
-                  },
-                  child: const Text("Find Password"),
-                  style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFF1976D2),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Already have an account?"),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Login"),
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF1976D2),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
