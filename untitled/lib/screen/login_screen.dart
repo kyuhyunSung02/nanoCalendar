@@ -28,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
           email: _emailController.text.trim(),
           password: _passwordController.text.trim());
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => SignUpScreen()));
+          context, MaterialPageRoute(builder: (context) => HomeScreen()));
     } on FirebaseAuthException catch (e) {
       String errorMessage = "An error occurred";
       if (e.code == 'user-not-found') {
