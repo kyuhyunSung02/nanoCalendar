@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:untitled/newScreen/login.dart';
 import 'firebase_options.dart'; // Firebase 설정 파일을 불러옵니다.
-
 import 'screen/login_screen.dart'; // 로그인 화면을 불러옵니다.
 
 void main() async {
   // Firebase 초기화를 위해 Flutter 엔진과의 바인딩을 설정합니다.
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting();
 
   // Firebase를 초기화합니다.
   await Firebase.initializeApp(
@@ -29,7 +31,6 @@ class MyApp extends StatelessWidget {
       ),
 
       home: const LoginScreen(), // 앱 시작 시 로그인 화면을 표시
-
     );
   }
 }

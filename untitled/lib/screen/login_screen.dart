@@ -1,81 +1,144 @@
-// screens/login_screen.dart
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../widgets/custom_button.dart'; // 커스텀 버튼을 사용하기 위해 불러옵니다.
+import 'package:untitled/screen/home_screen.dart';
+import 'package:untitled/screen/signup_screen.dart';
+import 'package:untitled/screen/find_passwd.dart';
+import '../widgets/custom_button.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
+
+  userLogin() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim());
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => HomeScreen()));
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = "An error occurred";
+      if (e.code == 'user-not-found') {
+        errorMessage = "No user found with this email";
+      } else if (e.code == 'wrong-password') {
+        errorMessage = "Wrong password";
+      }
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(errorMessage)));
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Welcome to Nano Calendar"),
-        backgroundColor: const Color(0xFF1976D2), // 앱 바의 배경색을 파란색으로 설정
+        backgroundColor: const Color(0xFF1976D2),
       ),
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0), // 화면 여백을 설정
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              // 고래 이미지를 화면에 표시합니다.
-              Image.asset(
-                'assets/whale.png', // 이미지 경로를 여기에 지정하세요
-                height: 150, // 이미지 높이를 설정
-              ),
-              const SizedBox(height: 20), // 위젯 간 간격 설정
-              // 사용자 이름 입력 필드
-              TextField(
-                decoration: InputDecoration(
-                  labelText: "Username", // 필드 레이블 텍스트
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0), // 둥근 테두리 설정
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Image.asset(
+                  'assets/whale.png',
+                  height: 150,
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: "Email",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: "Password",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your password';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                if (_isLoading)
+                  const CircularProgressIndicator()
+                else
+                  CustomButton(
+                    text: "Login",
+                    color: const Color(0xFF1976D2),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        userLogin();
+                      }
+                    },
+                  ),
+                const SizedBox(height: 10),
+                CustomButton(
+                  text: "Sign Up",
+                  color: Colors.white,
+                  textColor: Colors.black,
+                  borderColor: Colors.black,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SignUpScreen()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 10),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => FindPasswordScreen()),
+                    );
+                  },
+                  child: const Text("Find Password"),
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF1976D2),
                   ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              // 비밀번호 입력 필드
-              TextField(
-                obscureText: true, // 입력 시 텍스트를 숨김
-                decoration: InputDecoration(
-                  labelText: "Password", // 필드 레이블 텍스트
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0), // 둥근 테두리 설정
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              // 커스텀 로그인 버튼
-              CustomButton(
-                text: "Login", // 버튼 텍스트
-                color: const Color(0xFF1976D2), // 버튼 배경색
-                onPressed: () {
-                  // 로그인 기능 추가
-                },
-              ),
-              const SizedBox(height: 10),
-              // 커스텀 회원가입 버튼
-              CustomButton(
-                text: "Sign Up", // 버튼 텍스트
-                color: Colors.white, // 버튼 배경색
-                textColor: Colors.black, // 텍스트 색상
-                borderColor: Colors.black, // 테두리 색상
-                onPressed: () {
-                  // 회원가입 기능 추가
-                },
-              ),
-              const SizedBox(height: 10),
-              // 비밀번호 찾기 버튼
-              TextButton(
-                onPressed: () {
-                  // 비밀번호 찾기 기능 추가
-                },
-                child: const Text("Find Password"),
-                style: TextButton.styleFrom(
-                  foregroundColor: const Color(0xFF1976D2), // 파란색 텍스트
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

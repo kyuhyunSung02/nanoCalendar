@@ -1,194 +1,123 @@
-// screens/findpasswd.dart
+// lib/screen/find_passwd.dart
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../widgets/custom_button.dart';
 
-
-void main() => runApp(MyApp());
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: FindPasswordScreen(),
-      ),
-    );
-  }
-}
-
 class FindPasswordScreen extends StatefulWidget {
+  const FindPasswordScreen({Key? key}) : super(key: key);
+
   @override
-  _FindPasswordScreenState createState() => _FindPasswordScreenState();
+  State<FindPasswordScreen> createState() => _FindPasswordScreenState();
 }
 
 class _FindPasswordScreenState extends State<FindPasswordScreen> {
   final TextEditingController _emailController = TextEditingController();
-  //final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  Color _borderColor = Colors.grey;
-  String _errorMessage = '';
+  final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
   bool _isEmailSent = false;
 
-  // 이메일 유효성 검사 함수
-  bool isValidEmail(String email) {
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    return emailRegex.hasMatch(email);
-  }
-
-  // 비밀번호 재설정 이메일 전송 함수
-  void _sendPasswordResetEmail() async {
-    String email = _emailController.text.trim();
-
-    // 이메일 유효성 검사
-    /*if (!isValidEmail(email)) {
-      setState(() {
-        _borderColor = Colors.red;
-        _errorMessage = '올바른 이메일 주소를 입력하세요.';
-      });
-      _hideErrorMessageAfterDelay();
-      return;
-    }
+  void resetPassword() async {
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
-      await _auth.sendPasswordResetEmail(email: email);
+      await FirebaseAuth.instance
+          .sendPasswordResetEmail(email: _emailController.text.trim());
       setState(() {
-        _borderColor = Colors.grey;
-        _errorMessage = '';
         _isEmailSent = true;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Password reset email has been sent")));
     } on FirebaseAuthException catch (e) {
+      String errorMessage = "Failed to send reset email";
       if (e.code == 'user-not-found') {
-        setState(() {
-          _borderColor = Colors.red;
-          _errorMessage = '회원 정보가 없습니다.';
-        });
-      } else {
-        setState(() {
-          _borderColor = Colors.red;
-          _errorMessage = '회원 정보가 없습니다.';
-        });
+        errorMessage = "No user found with this email";
       }
-      _hideErrorMessageAfterDelay();
-    }*/
-  }
-
-  // 에러 메시지를 일정 시간 후에 숨김
-  void _hideErrorMessageAfterDelay() {
-    Future.delayed(Duration(seconds: 2), () {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(errorMessage)));
+    } finally {
       setState(() {
-        _errorMessage = '';
+        _isLoading = false;
       });
-    });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(
-          child: Text(
-            'Find Password',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-        backgroundColor: Colors.blue,
-        automaticallyImplyLeading: false,
+        title: const Text("Find Password"),
+        backgroundColor: const Color(0xFF1976D2),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (!_isEmailSent) ...[
-              Text(
-                'Enter your email here to reset your password',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
-              ),
-              SizedBox(height: 20),
-
-              // 이메일 입력 필드 (이메일 전송 전)
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  hintText: 'example@gmail.com',
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.zero,
-                    borderSide: BorderSide(color: _borderColor),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.zero,
-                    borderSide: BorderSide(color: _borderColor, width: 2.0),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Image.asset(
+                  'assets/whale.png',
+                  height: 150,
                 ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-              SizedBox(height: 20),
-
-              // Send E-mail 버튼 (이메일 전송 전)
-              CustomButton(
-                text: 'Send E-mail',
-                onPressed: _sendPasswordResetEmail,
-                color: Colors.blue, // 버튼 배경색
-                textColor: Colors.white, // 텍스트 색상
-              ),
-            ] else ...[
-              // 이메일 전송 후 표시할 텍스트 (성공 시)
-              Text(
-                '비밀번호 재설정 이메일이 전송되었습니다.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.green),
-              ),
-            ],
-
-            SizedBox(height: 10),
-
-            if (!_isEmailSent) ...[
-              // Back to Login 버튼 (이메일 입력 화면일 때만 표시)
-              CustomButton(
-                text: 'Back to Login',
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                color: Colors.blue, // 버튼 배경색
-                textColor: Colors.white, // 텍스트 색상
-              ),
-            ],
-
-            SizedBox(height: 20),
-
-            if (_errorMessage.isNotEmpty)
-              Container(
-                padding:
-                EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                width:
-                MediaQuery.of(context).size.width * 0.8,
-                decoration:
-                BoxDecoration(color:
-                Colors.blue, borderRadius:
-                BorderRadius.circular(20),
-                    border:
-                    Border.all(color:
-                    Colors.blue, width:
-                    2)),
-                child:
-                Row(
-                  mainAxisAlignment:
-                  MainAxisAlignment.center,
-                  children:[
-                    Icon(Icons.close,color:
-                    Colors.red),
-                    SizedBox(width:
-                    8),
-                    Text(_errorMessage, style:
-                    TextStyle(color:
-                    Colors.white)),
-                  ],
+                const SizedBox(height: 20),
+                if (!_isEmailSent) ...[
+                  const Text(
+                    'Enter your email to reset your password',
+                    style: TextStyle(fontSize: 16),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      labelText: "Email",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  if (_isLoading)
+                    const CircularProgressIndicator()
+                  else
+                    CustomButton(
+                      text: "Send Reset Email",
+                      color: const Color(0xFF1976D2),
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          resetPassword();
+                        }
+                      },
+                    ),
+                ] else ...[
+                  const Text(
+                    'Password reset email has been sent.\nPlease check your inbox.',
+                    style: TextStyle(fontSize: 16, color: Colors.green),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+                const SizedBox(height: 20),
+                CustomButton(
+                  text: "Back to Login",
+                  color: Colors.white,
+                  textColor: Colors.black,
+                  borderColor: Colors.black,
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
                 ),
-              ),
-          ],
+              ],
+            ),
+          ),
         ),
       ),
     );
