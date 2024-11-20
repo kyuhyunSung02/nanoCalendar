@@ -160,6 +160,10 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+<<<<<<< HEAD
+=======
+
+>>>>>>> parent of b3f9630 (Merge pull request #6 from GoMoPro/develop)
   intl:
     dependency: "direct main"
     description:
