@@ -2,7 +2,9 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_button.dart';
 
-class AddSchedule extends StatelessWidget {
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
