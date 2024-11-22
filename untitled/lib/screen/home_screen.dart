@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:untitled/screen/Timebox_screen.dart';
 import 'package:untitled/screen/add_schedule.dart';
 import 'package:untitled/screen/calendar_screen.dart';
 import 'package:untitled/screen/schedule_screen.dart';
@@ -41,6 +42,47 @@ class _HomeScreenState extends State<HomeScreen> {
               MaterialPageRoute(builder: (context) => AddSchedule())
           );
         },
+        child: Icon(
+          Icons.add,
+          color: const Color(0xFFFFFFFF),
+        ),
+      ),
+      drawer: Drawer(
+          child: ListView(
+            children: [
+              const UserAccountsDrawerHeader(
+                accountName: Text("Name"),
+                accountEmail: Text("accountEmail"),
+                decoration: BoxDecoration(color: Color(0xFF1976D2)),
+              ),
+              ListTile(
+                leading: Icon(Icons.calendar_month),
+                iconColor: const Color(0xFF1976D2),
+                focusColor: const Color(0xFF1976D2),
+                title: Text('월간 달력'),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomeScreen())
+                  );
+                },
+                trailing: Icon(Icons.navigate_next),
+              ),
+              ListTile(
+                leading: Icon(Icons.calendar_view_week),
+                iconColor: const Color(0xFF1976D2),
+                focusColor: const Color(0xFF1976D2),
+                title: Text('주간 타임박스'),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => TimeboxScreen())
+                  );
+                },
+                trailing: Icon(Icons.navigate_next),
+              )
+            ],
+          ),
       ),
     );
   }
