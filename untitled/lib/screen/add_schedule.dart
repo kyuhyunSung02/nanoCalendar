@@ -1,6 +1,7 @@
 // screens/add_schedule.dart
 import 'package:flutter/material.dart';
 import '../widgets/custom_button.dart';
+import 'home_screen.dart';
 
 class AddSchedule extends StatelessWidget {
   @override
@@ -25,6 +26,7 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
   TimeOfDay afternoonTime = TimeOfDay(hour: 14, minute: 30);
   String memo = '';
   String scheduleTitle = '';
+  Color? selectedColor;
 
   // 시간 선택 함수 (오전/오후 시간 선택)
   Future<void> _selectTime(BuildContext context, bool isMorning) async {
@@ -69,6 +71,7 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
               },
             ),
             SizedBox(height: 24),
+
 
             // 하루종일 설정 스위치 (시계 아이콘 추가)
             Row(
@@ -187,16 +190,66 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
 
 
             // 색상 옵션 - 너비에 맞게 확장됨 (moved here)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Expanded(child: ColorOption(Colors.red)),
-                Expanded(child: ColorOption(Colors.orange)),
-                Expanded(child: ColorOption(Colors.yellow)),
-                Expanded(child: ColorOption(Colors.green)),
-                Expanded(child: ColorOption(Colors.blue)),
-              ],
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Expanded(
+            child: ColorOption(
+              color: Colors.red,
+              isSelected: selectedColor == Colors.red,
+              onTap: () {
+                setState(() {
+                  selectedColor = Colors.red;
+                });
+              },
             ),
+          ),
+          Expanded(
+            child: ColorOption(
+              color: Colors.orange,
+              isSelected: selectedColor == Colors.orange,
+              onTap: () {
+                setState(() {
+                  selectedColor = Colors.orange;
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: ColorOption(
+              color: Colors.yellow,
+              isSelected: selectedColor == Colors.yellow,
+              onTap: () {
+                setState(() {
+                  selectedColor = Colors.yellow;
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: ColorOption(
+              color: Colors.green,
+              isSelected: selectedColor == Colors.green,
+              onTap: () {
+                setState(() {
+                  selectedColor = Colors.green;
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: ColorOption(
+              color: Colors.blue,
+              isSelected: selectedColor == Colors.blue,
+              onTap: () {
+                setState(() {
+                  selectedColor = Colors.blue;
+                });
+              },
+            ),
+          ),
+        ],
+      ),
 
             SizedBox(height: 20),
 
@@ -204,28 +257,37 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
             Row(
               children: [
                 Expanded(
-                  child:
-                  CustomButton( // CustomButton 사용
-                    text:'취소',
-                    onPressed : () {},
-                    color : Colors.grey[400]!,
-                    textColor : Colors.white,
+                  child: CustomButton(
+                    text: '취소',
+                    onPressed: () {
+                      // HomeScreen으로 이동
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => HomeScreen()),
+                            (route) => false, // 이전 화면 스택 제거
+                      );
+                    },
+                    color: Colors.grey[400]!,
+                    textColor: Colors.white,
                   ),
                 ),
-
                 Expanded(
-                  child:
-                  CustomButton( // CustomButton 사용
-                    text:'확인',
-                    onPressed : () {},
-                    color : Colors.blue[400]!,
-                    textColor : Colors.white,
+                  child: CustomButton(
+                    text: '확인',
+                    onPressed: () {
+                      // HomeScreen으로 이동
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => HomeScreen()),
+                            (route) => false, // 이전 화면 스택 제거
+                      );
+                    },
+                    color: Colors.blue[400]!,
+                    textColor: Colors.white,
                   ),
                 ),
-
-
               ],
-            )
+            ),
           ],
         ),
       ),
@@ -237,15 +299,29 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
 // 색상 옵션 위젯 정의
 class ColorOption extends StatelessWidget {
   final Color color;
+  final bool isSelected; // 선택 여부
+  final VoidCallback onTap; // 터치 이벤트 콜백
 
-  ColorOption(this.color);
+  ColorOption({
+    required this.color,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 40, // 색상 옵션의 고정 높이 설정
-      decoration:
-      BoxDecoration(color: color, borderRadius: BorderRadius.circular(8)),
+    return GestureDetector(
+      onTap: onTap, // 터치 시 콜백 실행
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(8),
+          border: isSelected
+              ? Border.all(color: Colors.black, width: 2) // 선택된 경우 테두리 추가
+              : null,
+        ),
+      ),
     );
   }
 }
