@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:untitled/newScreen/login.dart';
+//import 'package:untitled/newScreen/login.dart';
 import 'package:untitled/screen/Timebox_screen.dart';
 import 'package:untitled/screen/home_screen.dart';
 import 'firebase_options.dart'; // Firebase 설정 파일을 불러옵니다.
