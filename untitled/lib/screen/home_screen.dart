@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             children: [
               CalendarScreen(selectedDate: selectedDate, onDaySelected: onDaySelected,),
-              ScheduleCard(startTime: 12, endTime: 14, content: "고모프")
+              ScheduleCard(startTime: 12, endTime: 14, content: "고모프", memo: "플러터 및 파이어베이스 회의",)
             ],
           )
       ),
