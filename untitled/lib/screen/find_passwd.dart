@@ -1,7 +1,7 @@
-// lib/screen/find_passwd.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../widgets/custom_button.dart';
+import 'signup_screen.dart';
 
 class FindPasswordScreen extends StatefulWidget {
   const FindPasswordScreen({Key? key}) : super(key: key);
@@ -11,6 +11,7 @@ class FindPasswordScreen extends StatefulWidget {
 }
 
 class _FindPasswordScreenState extends State<FindPasswordScreen> {
+  String email = "";
   final TextEditingController _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
@@ -28,14 +29,26 @@ class _FindPasswordScreenState extends State<FindPasswordScreen> {
         _isEmailSent = true;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Password reset email has been sent")));
+        SnackBar(
+          content: Text(
+            "Password Reset Email has been sent!",
+            style: TextStyle(fontSize: 20.0),
+          ),
+        ),
+      );
     } on FirebaseAuthException catch (e) {
       String errorMessage = "Failed to send reset email";
       if (e.code == 'user-not-found') {
         errorMessage = "No user found with this email";
       }
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(errorMessage)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            errorMessage,
+            style: TextStyle(fontSize: 20.0),
+          ),
+        ),
+      );
     } finally {
       setState(() {
         _isLoading = false;
@@ -46,78 +59,147 @@ class _FindPasswordScreenState extends State<FindPasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Find Password"),
-        backgroundColor: const Color(0xFF1976D2),
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Image.asset(
-                  'assets/whale.png',
-                  height: 150,
-                ),
-                const SizedBox(height: 20),
-                if (!_isEmailSent) ...[
-                  const Text(
-                    'Enter your email to reset your password',
-                    style: TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      labelText: "Email",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  if (_isLoading)
-                    const CircularProgressIndicator()
-                  else
-                    CustomButton(
-                      text: "Send Reset Email",
-                      color: const Color(0xFF1976D2),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          resetPassword();
-                        }
-                      },
-                    ),
-                ] else ...[
-                  const Text(
-                    'Password reset email has been sent.\nPlease check your inbox.',
-                    style: TextStyle(fontSize: 16, color: Colors.green),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-                const SizedBox(height: 20),
-                CustomButton(
-                  text: "Back to Login",
-                  color: Colors.white,
-                  textColor: Colors.black,
-                  borderColor: Colors.black,
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
+      backgroundColor: Colors.black,
+      body: Container(
+        child: Column(
+          children: [
+            SizedBox(
+              height: 70.0,
             ),
-          ),
+            Container(
+              alignment: Alignment.topCenter,
+              child: Text(
+                "Password Recovery",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 30.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10.0,
+            ),
+            Text(
+              "Enter your mail",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Expanded(
+              child: Form(
+                key: _formKey,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 10.0, right: 10.0),
+                  child: ListView(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.only(left: 10.0),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.white70, width: 2.0),
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: TextFormField(
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please Enter Email';
+                            }
+                            return null;
+                          },
+                          controller: _emailController,
+                          style: TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                            hintText: "Email",
+                            hintStyle: TextStyle(
+                              fontSize: 18.0,
+                              color: Colors.white,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.person,
+                              color: Colors.white70,
+                              size: 30.0,
+                            ),
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 40.0,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          if (_formKey.currentState!.validate()) {
+                            resetPassword();
+                          }
+                        },
+                        child: Container(
+                          width: 140,
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Center(
+                            child: _isLoading
+                                ? CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.black),
+                                  )
+                                : Text(
+                                    "Send Email",
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 18.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 50.0,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Don't have an account?",
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              color: Colors.white,
+                            ),
+                          ),
+                          SizedBox(
+                            width: 5.0,
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => SignUpScreen(),
+                                ),
+                              );
+                            },
+                            child: Text(
+                              "Create",
+                              style: TextStyle(
+                                color: Color.fromARGB(225, 184, 166, 6),
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
