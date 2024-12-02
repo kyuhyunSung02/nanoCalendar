@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:untitled/screen/Timebox_screen.dart';
 import 'package:untitled/screen/add_schedule.dart';
 import 'package:untitled/screen/calendar_screen.dart';
@@ -74,19 +75,68 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: filteredSchedules.length,
                   itemBuilder: (context, index) {
                     final schedule = filteredSchedules[index];
-                    return ScheduleCard(
-                      startTime: schedule['startTime'],
-                      endTime: schedule['endTime'],
-                      content: schedule['content'],
-                      memo: schedule['memo'],
-                      color: schedule['color'],
-                      isAlarmEnabled: schedule['isAlarmEnabled'],
-                      onAlarmToggle: () {
-                        setState(() {
-                          // 알람 상태 변경
-                          schedule['isAlarmEnabled'] = !schedule['isAlarmEnabled'];
-                        });
-                      },
+                    return Slidable(
+                      key: Key(schedule['content']),
+                      startActionPane: ActionPane(
+                        motion: const DrawerMotion(),
+                        children: [
+                          SlidableAction(
+                            onPressed: (context) {
+                              // 편집 동작
+                              print(schedule);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AddSchedule(
+                                    selectedDate: selectedDate,
+                                    existingSchedule: schedule, // 기존 일정 전달
+                                  ),
+                                ),
+                              ).then((updatedSchedule) {
+                                if (updatedSchedule != null) {
+                                  setState(() {
+                                    int index = schedules.indexOf(schedule); // 기존 일정의 인덱스를 찾아
+                                    schedules[index] = updatedSchedule; // 해당 일정을 수정된 내용으로 업데이트
+                                  });
+                                }
+                              });
+                            },
+                            backgroundColor: Colors.blue,
+                            icon: Icons.edit,
+                            label: '편집',
+                          ),
+                        ],
+                      ),
+                      endActionPane: ActionPane(
+                        motion: const DrawerMotion(),
+                        children: [
+                          SlidableAction(
+                            onPressed: (context) {
+                              // 삭제 동작
+                              setState(() {
+                                schedules.removeAt(index); // 일정 삭제
+                              });
+                            },
+                            backgroundColor: Colors.red,
+                            icon: Icons.delete,
+                            label: '삭제',
+                          ),
+                        ],
+                      ),
+                      child: ScheduleCard(
+                        startTime: schedule['startTime'],
+                        endTime: schedule['endTime'],
+                        content: schedule['content'],
+                        memo: schedule['memo'],
+                        color: schedule['color'],
+                        isAlarmEnabled: schedule['isAlarmEnabled'],
+                        onAlarmToggle: () {
+                          setState(() {
+                            // 알람 상태 변경
+                            schedule['isAlarmEnabled'] = !schedule['isAlarmEnabled'];
+                          });
+                        },
+                      ),
                     );
                   },
                 ),
@@ -104,7 +154,6 @@ class _HomeScreenState extends State<HomeScreen> {
               builder: (context) => AddSchedule(selectedDate: selectedDate), // 선택된 날짜 전달
             ),
           );
-          print(newSchedule);
           if (newSchedule != null) {
             setState(() {
               schedules.add(newSchedule); // 새로운 일정 추가
@@ -156,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void onDaySelected(DateTime selectedDate, DateTime focuesdDate) {
+  void onDaySelected(DateTime selectedDate, DateTime focusedDate) {
     setState(() {
       this.selectedDate = selectedDate;
     });
