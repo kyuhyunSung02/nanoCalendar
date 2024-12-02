@@ -146,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const TimeboxScreen()));
+                        builder: (context) => TimeboxScreen(schedules: schedules)));
               },
               trailing: const Icon(Icons.navigate_next),
             )
