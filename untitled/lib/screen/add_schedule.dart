@@ -10,10 +10,9 @@ class AddSchedule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: RoutineSettingsScreen(selectedDate: selectedDate), // 날짜 전달
-      ),
+    return Scaffold(
+      appBar: AppBar(title: const Text("일정 추가")),
+      body: RoutineSettingsScreen(selectedDate: selectedDate),
     );
   }
 }
@@ -171,7 +170,7 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
                   ],
                 ),
                 Switch(
-                  value: isAlarmEnabled,
+                  value: isAlarmEnabled ?? false,
                   onChanged: (value) {
                     setState(() {
                       isAlarmEnabled = value;
@@ -290,19 +289,27 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
                   child: CustomButton(
                     text: '확인',
                     onPressed: () {
-                      if (scheduleTitle.isEmpty) return; // 제목이 비어 있으면 추가하지 않음
-
-                      final newSchedule = {
-                        'date': DateTime.utc(selectedDate.year, selectedDate.month, selectedDate.day),
-                        'startTime': morningTime.hour, // 시작 시간
-                        'endTime': afternoonTime.hour, // 종료 시간
-                        'content': scheduleTitle,      // 일정 제목
-                        'memo': memo,                  // 메모 내용
-                        'alarm' : isAlarmEnabled,      // 알람 여부
-                        'color': selectedColor,        // 선택한 색상
-                      };
-                      print(newSchedule);
-                      Navigator.pop(context, newSchedule); // 데이터를 HomeScreen으로 반환
+                      if (scheduleTitle.isEmpty) // 제목이 비어 있으면 추가하지 않음
+                      {
+                        // 제목이 비어 있으면 알림 메시지 표시
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('일정 제목을 입력해주세요.')),
+                        );
+                      } else {
+                        final newSchedule = {
+                          'date': DateTime.utc(
+                              selectedDate.year, selectedDate.month,
+                              selectedDate.day),
+                          'startTime': morningTime, // 시작 시간
+                          'endTime': afternoonTime, // 종료 시간
+                          'content': scheduleTitle, // 일정 제목
+                          'memo': memo, // 메모 내용
+                          'isAlarmEnabled': isAlarmEnabled, // 알람 여부
+                          'color': selectedColor ?? Colors.blue, // 선택한 색상
+                        };
+                        print(newSchedule);
+                        Navigator.pop(context, newSchedule); // 데이터를 HomeScreen으로 반환
+                      }
                     },
                     color: Colors.blue[400]!,
                     textColor: Colors.white,

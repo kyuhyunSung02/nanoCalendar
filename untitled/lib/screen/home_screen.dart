@@ -22,8 +22,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Map<String, dynamic>> schedules = [
     {
       'date': DateTime.utc(2024, 12, 2),
-      'startTime': 12,
-      'endTime': 14,
+      'startTime': TimeOfDay(hour: 9, minute: 30),
+      'endTime': TimeOfDay(hour: 11, minute: 30),
       'content': "고모프",
       'memo': "플러터 및 파이어베이스 회의",
       'color': Colors.blue,
@@ -31,8 +31,8 @@ class _HomeScreenState extends State<HomeScreen> {
     },
     {
       'date': DateTime.utc(2024, 12, 3),
-      'startTime': 10,
-      'endTime': 11,
+      'startTime': TimeOfDay(hour: 13, minute: 30),
+      'endTime': TimeOfDay(hour: 18, minute: 0),
       'content': "스터디",
       'memo': "알고리즘 문제 풀이",
       'color': Colors.green,
@@ -40,8 +40,8 @@ class _HomeScreenState extends State<HomeScreen> {
     },
     {
       'date': DateTime.utc(2024, 12, 2),
-      'startTime': 15,
-      'endTime': 16,
+      'startTime': TimeOfDay(hour: 14, minute: 30),
+      'endTime': TimeOfDay(hour: 16, minute: 20),
       'content': "코드 리뷰",
       'memo': "팀 프로젝트 코드 점검",
       'color': Colors.red,
@@ -92,7 +92,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ],
-          )),
+          )
+      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF1976D2),
         onPressed: () async {

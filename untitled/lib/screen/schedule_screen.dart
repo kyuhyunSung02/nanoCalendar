@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 
 class _Time extends StatelessWidget {
-  final int startTime; // 시작 시간
-  final int endTime; // 종료 시간
+  final TimeOfDay startTime; // 시작 시간
+  final TimeOfDay endTime; // 종료 시간
 
   const _Time({
     required this.startTime,
     required this.endTime,
     Key? key
   }) : super(key: key);
+
+  // TimeOfDay를 00:00 형식의 문자열로 변환하는 함수
+  String formatTime(TimeOfDay time) {
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
 
   @override
   Widget build(BuildContext context){
@@ -22,15 +29,15 @@ class _Time extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '${startTime.toString().padLeft(2, '0')}:00',
+          formatTime(startTime),
           style: textStyle,
         ),
         Text(
-          '${endTime.toString().padLeft(2, '0')}:00',
+          formatTime(endTime),
           style: textStyle.copyWith(
             fontSize: 10.0,
           ),
-        )
+        ),
       ],
     );
   }
@@ -59,14 +66,22 @@ class _Content extends StatelessWidget{
               fontWeight: FontWeight.w500,
             ),
           ),
-          if (memo!.isNotEmpty)
+          // 메모가 비어있지 않으면 표시
+          if (memo.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
-              child: Text(
-                '메모: $memo',
-                style: TextStyle(
-                  fontSize: 10.0,
-                  color: Colors.grey[600],
+              child: SizedBox(
+                height: 30.0, // 적절한 높이를 설정해서 텍스트가 넘어가지 않도록 조정
+                child: SingleChildScrollView(  // 텍스트가 넘치면 스크롤 가능
+                  child: Text(
+                    '메모: $memo',
+                    style: TextStyle(
+                      fontSize: 10.0,
+                      color: Colors.grey[600],
+                    ),
+                    overflow: TextOverflow.ellipsis, // 텍스트가 넘칠 경우 말줄임 표시
+                    maxLines: 2,  // 텍스트가 2줄을 넘지 않도록 설정
+                  ),
                 ),
               ),
             ),
@@ -77,8 +92,8 @@ class _Content extends StatelessWidget{
 }
 
 class ScheduleCard extends StatelessWidget{
-  final int startTime;
-  final int endTime;
+  final TimeOfDay startTime;
+  final TimeOfDay endTime;
   final String content;
   final String memo;
   final Color color;
