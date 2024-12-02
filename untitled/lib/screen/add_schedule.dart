@@ -4,22 +4,31 @@ import '../widgets/custom_button.dart';
 import 'home_screen.dart';
 
 class AddSchedule extends StatelessWidget {
+  final DateTime selectedDate; // 선택된 날짜를 받는 필드
+
+  const AddSchedule({Key? key, required this.selectedDate}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: RoutineSettingsScreen(),
+        body: RoutineSettingsScreen(selectedDate: selectedDate), // 날짜 전달
       ),
     );
   }
 }
 
 class RoutineSettingsScreen extends StatefulWidget {
+  final DateTime selectedDate; // 선택된 날짜를 받는 필드
+
+  const RoutineSettingsScreen({Key? key, required this.selectedDate}) : super(key: key);
+
   @override
   _RoutineSettingsScreenState createState() => _RoutineSettingsScreenState();
 }
 
 class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
+  late DateTime selectedDate; // 날짜 필드
   bool isDailyRoutineEnabled = true;
   bool isAlarmEnabled = true;
   TimeOfDay morningTime = TimeOfDay(hour: 8, minute: 30);
@@ -27,6 +36,12 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
   String memo = '';
   String scheduleTitle = '';
   Color? selectedColor;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedDate = widget.selectedDate; // 초기화
+  }
 
   // 시간 선택 함수 (오전/오후 시간 선택)
   Future<void> _selectTime(BuildContext context, bool isMorning) async {
@@ -275,12 +290,19 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
                   child: CustomButton(
                     text: '확인',
                     onPressed: () {
-                      // HomeScreen으로 이동
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => HomeScreen()),
-                            (route) => false, // 이전 화면 스택 제거
-                      );
+                      if (scheduleTitle.isEmpty) return; // 제목이 비어 있으면 추가하지 않음
+
+                      final newSchedule = {
+                        'date': DateTime.utc(selectedDate.year, selectedDate.month, selectedDate.day),
+                        'startTime': morningTime.hour, // 시작 시간
+                        'endTime': afternoonTime.hour, // 종료 시간
+                        'content': scheduleTitle,      // 일정 제목
+                        'memo': memo,                  // 메모 내용
+                        'alarm' : isAlarmEnabled,      // 알람 여부
+                        'color': selectedColor,        // 선택한 색상
+                      };
+                      print(newSchedule);
+                      Navigator.pop(context, newSchedule); // 데이터를 HomeScreen으로 반환
                     },
                     color: Colors.blue[400]!,
                     textColor: Colors.white,

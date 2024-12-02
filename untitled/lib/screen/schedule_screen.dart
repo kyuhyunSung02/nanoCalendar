@@ -81,12 +81,18 @@ class ScheduleCard extends StatelessWidget{
   final int endTime;
   final String content;
   final String memo;
+  final Color color;
+  final bool isAlarmEnabled; // 알람 여부 추가
+  final VoidCallback onAlarmToggle; // 알람 토글 콜백 추가
 
   const ScheduleCard({
     required this.startTime,
     required this.endTime,
     required this.content,
     required this.memo,
+    required this.color,
+    required this.isAlarmEnabled, // 알람 여부 매개변수 추가
+    required this.onAlarmToggle, // 알람 토글 콜백 매개변수 추가
     Key? key
   }) : super(key: key);
 
@@ -110,7 +116,31 @@ class ScheduleCard extends StatelessWidget{
               _Time(startTime: startTime, endTime: endTime),
               SizedBox(width: 16.0,),
               _Content(content: content, memo: memo),
-              SizedBox(width: 16.0,)
+              SizedBox(width: 16.0,),
+              // 우측 가운데에 동그라미 색상 표시
+              Center(
+                child: Container(
+                  width: 24.0, // 동그라미의 너비
+                  height: 24.0, // 동그라미의 높이
+                  decoration: BoxDecoration(
+                    color: color, // 동그라미 색상
+                    shape: BoxShape.circle, // 원형으로 설정
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16.0),
+              // 알람 아이콘 버튼
+              Center(
+                child: IconButton(
+                  icon: Icon(
+                    isAlarmEnabled
+                        ? Icons.notifications // 알람이 활성화된 경우
+                        : Icons.notifications_none, // 알람이 비활성화된 경우
+                    color: isAlarmEnabled ? Colors.black : Colors.grey, // 색상 변경
+                  ),
+                  onPressed: onAlarmToggle, // 알람 상태 변경 함수 호출
+                ),
+              ),
             ],
           )
         )

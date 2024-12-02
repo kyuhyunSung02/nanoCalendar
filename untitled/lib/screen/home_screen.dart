@@ -18,75 +18,144 @@ class _HomeScreenState extends State<HomeScreen> {
     DateTime.now().day,
   );
 
+  // 스케줄 데이터 리스트
+  final List<Map<String, dynamic>> schedules = [
+    {
+      'date': DateTime.utc(2024, 12, 2),
+      'startTime': 12,
+      'endTime': 14,
+      'content': "고모프",
+      'memo': "플러터 및 파이어베이스 회의",
+      'color': Colors.blue,
+      'isAlarmEnabled': false, // 알람 상태 추가
+    },
+    {
+      'date': DateTime.utc(2024, 12, 3),
+      'startTime': 10,
+      'endTime': 11,
+      'content': "스터디",
+      'memo': "알고리즘 문제 풀이",
+      'color': Colors.green,
+      'isAlarmEnabled': true, // 알람 활성화 상태
+    },
+    {
+      'date': DateTime.utc(2024, 12, 2),
+      'startTime': 15,
+      'endTime': 16,
+      'content': "코드 리뷰",
+      'memo': "팀 프로젝트 코드 점검",
+      'color': Colors.red,
+      'isAlarmEnabled': false, // 알람 비활성화 상태
+    },
+  ];
+
   @override
   Widget build(BuildContext context) {
+    // 선택된 날짜의 스케줄 필터링
+    final filteredSchedules = schedules.where((schedule) {
+      return schedule['date'] == selectedDate;
+    }).toList();
+
     return Scaffold(
       appBar: AppBar(
           title: const Text("Nano Calendar"),
           foregroundColor: const Color(0xFFFFFFFF),
-          backgroundColor: const Color(0xFF1976D2)
-      ),
+          backgroundColor: const Color(0xFF1976D2)),
       body: SafeArea(
           child: Column(
             children: [
-              CalendarScreen(selectedDate: selectedDate, onDaySelected: onDaySelected,),
-              ScheduleCard(startTime: 12, endTime: 14, content: "고모프", memo: "플러터 및 파이어베이스 회의",)
+              CalendarScreen(
+                selectedDate: selectedDate,
+                onDaySelected: onDaySelected,
+              ),
+              // 선택된 날짜의 스케줄 표시
+              Expanded(
+                child: ListView.builder(
+                  itemCount: filteredSchedules.length,
+                  itemBuilder: (context, index) {
+                    final schedule = filteredSchedules[index];
+                    return ScheduleCard(
+                      startTime: schedule['startTime'],
+                      endTime: schedule['endTime'],
+                      content: schedule['content'],
+                      memo: schedule['memo'],
+                      color: schedule['color'],
+                      isAlarmEnabled: schedule['isAlarmEnabled'],
+                      onAlarmToggle: () {
+                        setState(() {
+                          // 알람 상태 변경
+                          schedule['isAlarmEnabled'] = !schedule['isAlarmEnabled'];
+                        });
+                      },
+                    );
+                  },
+                ),
+              ),
             ],
-          )
-      ),
+          )),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Color(0xFF1976D2),
-        onPressed: (){
-          Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AddSchedule())
+        backgroundColor: const Color(0xFF1976D2),
+        onPressed: () async {
+          // AddSchedule 화면에서 데이터를 받아옴
+          final newSchedule = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddSchedule(selectedDate: selectedDate), // 선택된 날짜 전달
+            ),
           );
+          print(newSchedule);
+          if (newSchedule != null) {
+            setState(() {
+              schedules.add(newSchedule); // 새로운 일정 추가
+            });
+          }
         },
-        child: Icon(
+        child: const Icon(
           Icons.add,
-          color: const Color(0xFFFFFFFF),
+          color: Color(0xFFFFFFFF),
         ),
       ),
       drawer: Drawer(
-          child: ListView(
-            children: [
-              const UserAccountsDrawerHeader(
-                accountName: Text("Name"),
-                accountEmail: Text("accountEmail"),
-                decoration: BoxDecoration(color: Color(0xFF1976D2)),
-              ),
-              ListTile(
-                leading: Icon(Icons.calendar_month),
-                iconColor: const Color(0xFF1976D2),
-                focusColor: const Color(0xFF1976D2),
-                title: Text('월간 달력'),
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => HomeScreen())
-                  );
-                },
-                trailing: Icon(Icons.navigate_next),
-              ),
-              ListTile(
-                leading: Icon(Icons.calendar_view_week),
-                iconColor: const Color(0xFF1976D2),
-                focusColor: const Color(0xFF1976D2),
-                title: Text('주간 타임박스'),
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => TimeboxScreen())
-                  );
-                },
-                trailing: Icon(Icons.navigate_next),
-              )
-            ],
-          ),
+        child: ListView(
+          children: [
+            const UserAccountsDrawerHeader(
+              accountName: Text("Name"),
+              accountEmail: Text("accountEmail"),
+              decoration: BoxDecoration(color: Color(0xFF1976D2)),
+            ),
+            ListTile(
+              leading: const Icon(Icons.calendar_month),
+              iconColor: const Color(0xFF1976D2),
+              focusColor: const Color(0xFF1976D2),
+              title: const Text('월간 달력'),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const HomeScreen()));
+              },
+              trailing: const Icon(Icons.navigate_next),
+            ),
+            ListTile(
+              leading: const Icon(Icons.calendar_view_week),
+              iconColor: const Color(0xFF1976D2),
+              focusColor: const Color(0xFF1976D2),
+              title: const Text('주간 타임박스'),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const TimeboxScreen()));
+              },
+              trailing: const Icon(Icons.navigate_next),
+            )
+          ],
+        ),
       ),
     );
   }
-  void onDaySelected(DateTime selectedDate, DateTime focuesdDate){
+
+  void onDaySelected(DateTime selectedDate, DateTime focuesdDate) {
     setState(() {
       this.selectedDate = selectedDate;
     });
