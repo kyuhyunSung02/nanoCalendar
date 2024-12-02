@@ -1,92 +1,52 @@
 import 'package:flutter/material.dart';
 
-class _Time extends StatelessWidget {
-  final int startTime; // 시작 시간
-  final int endTime; // 종료 시간
+class CalendarScreen extends StatelessWidget {
+  final DateTime selectedDate;
+  final void Function(DateTime, DateTime) onDaySelected;
+  final Map<String, String> dateColors; // 날짜와 색상 매핑
 
-  const _Time({
-    required this.startTime,
-    required this.endTime,
-    Key? key
+  const CalendarScreen({
+    required this.selectedDate,
+    required this.onDaySelected,
+    required this.dateColors,
+    Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context){
-    const textStyle = TextStyle(
-      fontWeight: FontWeight.w600,
-      color: Color(0xFF1976D2),
-      fontSize: 16.0,
-    );
+  Widget build(BuildContext context) {
+    // 예시 캘린더 구현 (날짜별 색상 적용)
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 7, // 7일로 나눔 (월~일)
+      ),
+      itemCount: 30, // 30일 기준
+      itemBuilder: (context, index) {
+        final date = DateTime(selectedDate.year, selectedDate.month, index + 1);
+        final dateKey = date.toIso8601String().substring(0, 10);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '${startTime.toString().padLeft(2, '0')}:00',
-          style: textStyle,
-        ),
-        Text(
-          '${endTime.toString().padLeft(2, '0')}:00',
-          style: textStyle.copyWith(
-            fontSize: 10.0,
+        // 해당 날짜의 색상 가져오기
+        final color = dateColors[dateKey] != null
+            ? Color(int.parse(dateColors[dateKey]!, radix: 16))
+            : Colors.grey;
+
+        return GestureDetector(
+          onTap: () => onDaySelected(date, date),
+          child: Container(
+            margin: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2), // 배경 색상
+              border: Border.all(color: color), // 테두리 색상
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Text(
+                "${index + 1}",
+                style: TextStyle(color: color),
+              ),
+            ),
           ),
-        )
-      ],
-    );
-  }
-}
-
-class _Content extends StatelessWidget{
-  final String content; // 내용
-
-  const _Content({
-    required this.content,
-    Key? key
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context){
-    return Expanded(child: Text(content),);
-  }
-}
-
-class ScheduleCard extends StatelessWidget{
-  final int startTime;
-  final int endTime;
-  final String content;
-
-  const ScheduleCard({
-    required this.startTime,
-    required this.endTime,
-    required this.content,
-    Key? key
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context){
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(
-          width: 1.0,
-          color: Color(0xFF1976D2),
-        ),
-        borderRadius: BorderRadius.circular(8.0)
-      ),
-
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child : IntrinsicHeight(
-          child : Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _Time(startTime: startTime, endTime: endTime),
-              SizedBox(width: 16.0,),
-              _Content(content: content),
-              SizedBox(width: 16.0,)
-            ],
-          )
-        )
-      ),
+        );
+      },
     );
   }
 }
