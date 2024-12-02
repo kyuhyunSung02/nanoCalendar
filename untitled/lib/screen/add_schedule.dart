@@ -3,23 +3,107 @@ import 'package:flutter/material.dart';
 import '../widgets/custom_button.dart';
 import 'home_screen.dart';
 
-class AddSchedule extends StatelessWidget {
+class AddSchedule extends StatefulWidget {
+  final DateTime selectedDate;
+  final Map<String, dynamic>? existingSchedule; // 기존 일정
+
+  const AddSchedule({Key? key, required this.selectedDate, this.existingSchedule}) : super(key: key);
+
+  @override
+  _AddScheduleState createState() => _AddScheduleState();
+}
+
+class _AddScheduleState extends State<AddSchedule> {
+  late String scheduleTitle;
+  late TimeOfDay morningTime;
+  late TimeOfDay afternoonTime;
+  late bool isAlarmEnabled;
+  late String memo;
+  late Color? selectedColor;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // 기존 일정이 있다면 데이터를 초기화
+    if (widget.existingSchedule != null) {
+      final schedule = widget.existingSchedule!;
+      print("초기화되는 값들: $schedule"); // 디버깅 로그 추가
+
+      scheduleTitle = schedule['content'] ?? '';
+      morningTime = schedule['startTime'] ?? TimeOfDay(hour: 6, minute: 00);
+      afternoonTime = schedule['endTime'] ?? TimeOfDay(hour: 18, minute: 00);
+      isAlarmEnabled = schedule['isAlarmEnabled'] ?? false;
+      memo = schedule['memo'] ?? '';
+      selectedColor = schedule['color'];
+    } else {
+      scheduleTitle = '';
+      morningTime = TimeOfDay(hour: 8, minute: 30);
+      afternoonTime = TimeOfDay(hour: 14, minute: 30);
+      isAlarmEnabled = true;
+      memo = '';
+      selectedColor = Colors.blue;
+    }
+  }
+
+  // 기존과 동일한 시간 선택, 알람 설정, 메모 입력 등을 추가하는 로직
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        body: RoutineSettingsScreen(),
+    return Scaffold(
+      appBar: AppBar(title: const Text("일정 추가")),
+      body: RoutineSettingsScreen(
+        selectedDate: widget.selectedDate,
+        scheduleTitle: scheduleTitle,
+        morningTime: morningTime,
+        afternoonTime: afternoonTime,
+        isAlarmEnabled: isAlarmEnabled,
+        memo: memo,
+        selectedColor: selectedColor,
+        onScheduleChange: (updatedSchedule) {
+          setState(() {
+            scheduleTitle = updatedSchedule['title'];
+            morningTime = updatedSchedule['morningTime'];
+            afternoonTime = updatedSchedule['afternoonTime'];
+            isAlarmEnabled = updatedSchedule['isAlarmEnabled'];
+            memo = updatedSchedule['memo'];
+            selectedColor = updatedSchedule['color'];
+          });
+        },
       ),
     );
   }
 }
 
 class RoutineSettingsScreen extends StatefulWidget {
+  final DateTime selectedDate; // 선택된 날짜를 받는 필드
+  final String scheduleTitle;
+  final TimeOfDay morningTime;
+  final TimeOfDay afternoonTime;
+  final bool isAlarmEnabled;
+  final String memo;
+  final Color? selectedColor;
+  final Function(Map<String, dynamic>) onScheduleChange; // 변경 사항 전달 콜백
+
+  const RoutineSettingsScreen({
+    Key? key,
+    required this.selectedDate,
+    required this.scheduleTitle,
+    required this.morningTime,
+    required this.afternoonTime,
+    required this.isAlarmEnabled,
+    required this.memo,
+    required this.selectedColor,
+    required this.onScheduleChange,
+  }) : super(key: key);
+
   @override
   _RoutineSettingsScreenState createState() => _RoutineSettingsScreenState();
 }
 
 class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
+  late DateTime selectedDate; // 날짜 필드
+  late TextEditingController titleController;
+  late TextEditingController memoController;
   bool isDailyRoutineEnabled = true;
   bool isAlarmEnabled = true;
   TimeOfDay morningTime = TimeOfDay(hour: 8, minute: 30);
@@ -27,6 +111,24 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
   String memo = '';
   String scheduleTitle = '';
   Color? selectedColor;
+
+  @override
+  void initState() {
+    super.initState();
+    // 초기값을 컨트롤러에 설정
+    titleController = TextEditingController(text: widget.scheduleTitle);
+    memoController = TextEditingController(text: widget.memo);
+
+    // 전달받은 초기값을 상태에 반영
+    selectedDate = widget.selectedDate;
+    isDailyRoutineEnabled = true; // 기본값 설정 (전달받는 값이 없다면)
+    isAlarmEnabled = widget.isAlarmEnabled; // 전달받은 알람 설정 값
+    morningTime = widget.morningTime; // 전달받은 시작 시간
+    afternoonTime = widget.afternoonTime; // 전달받은 종료 시간
+    memo = widget.memo; // 전달받은 메모
+    scheduleTitle = widget.scheduleTitle; // 전달받은 일정 제목
+    selectedColor = widget.selectedColor; // 전달받은 색상
+  }
 
   // 시간 선택 함수 (오전/오후 시간 선택)
   Future<void> _selectTime(BuildContext context, bool isMorning) async {
@@ -41,6 +143,16 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
         } else {
           afternoonTime = picked;
         }
+
+        // 변경된 일정 데이터를 상위로 전달
+        widget.onScheduleChange({
+          'title': scheduleTitle,
+          'morningTime': morningTime,
+          'afternoonTime': afternoonTime,
+          'isAlarmEnabled': isAlarmEnabled,
+          'memo': memo,
+          'color': selectedColor,
+        });
       });
     }
   }
@@ -60,6 +172,7 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
 
             // 제목 입력 필드 (밑줄만 표시)
             TextField(
+              controller: titleController, // 컨트롤러 연결
               decoration: InputDecoration(
                 hintText: '제목 입력',
                 border: UnderlineInputBorder(),
@@ -67,6 +180,15 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
               onChanged: (value) {
                 setState(() {
                   scheduleTitle = value;
+                });
+                // 변경 사항 상위에 전달
+                widget.onScheduleChange({
+                  'title': value,
+                  'morningTime': morningTime,
+                  'afternoonTime': afternoonTime,
+                  'isAlarmEnabled': isAlarmEnabled,
+                  'memo': memoController.text, // 메모 필드도 포함
+                  'color': selectedColor,
                 });
               },
             ),
@@ -156,7 +278,7 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
                   ],
                 ),
                 Switch(
-                  value: isAlarmEnabled,
+                  value: isAlarmEnabled ?? false,
                   onChanged: (value) {
                     setState(() {
                       isAlarmEnabled = value;
@@ -170,6 +292,7 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
 
             // 메모 입력 필드 (직사각형 모양)
             TextField(
+              controller: memoController, // 컨트롤러 연결
               decoration: InputDecoration(
                 labelText: '메모',
                 icon: Icon(Icons.note),
@@ -181,6 +304,15 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
               onChanged: (value) {
                 setState(() {
                   memo = value;
+                });
+                // 변경 사항 상위에 전달
+                widget.onScheduleChange({
+                  'title': scheduleTitle,
+                  'morningTime': morningTime,
+                  'afternoonTime': afternoonTime,
+                  'isAlarmEnabled': isAlarmEnabled,
+                  'memo': value, // 메모 필드
+                  'color': selectedColor,
                 });
               },
             ),
@@ -275,12 +407,20 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
                   child: CustomButton(
                     text: '확인',
                     onPressed: () {
-                      // HomeScreen으로 이동
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => HomeScreen()),
-                            (route) => false, // 이전 화면 스택 제거
-                      );
+                      if (scheduleTitle.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('일정 제목을 입력해주세요.')));
+                      } else {
+                        final updatedSchedule = {
+                          'date': DateTime.utc(selectedDate.year, selectedDate.month, selectedDate.day),
+                          'startTime': morningTime,
+                          'endTime': afternoonTime,
+                          'content': scheduleTitle,
+                          'memo': memo,
+                          'isAlarmEnabled': isAlarmEnabled,
+                          'color': selectedColor ?? Colors.blue,
+                        };
+                        Navigator.pop(context, updatedSchedule); // 수정된 일정 반환
+                      }
                     },
                     color: Colors.blue[400]!,
                     textColor: Colors.white,
@@ -293,6 +433,12 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
       ),
     ),
     );
+  }
+  @override
+  void dispose() {
+    titleController.dispose();
+    memoController.dispose();
+    super.dispose();
   }
 }
 
