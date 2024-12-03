@@ -5,6 +5,7 @@ import 'package:untitled/screen/add_schedule.dart';
 import 'package:untitled/screen/calendar_screen.dart';
 import 'package:untitled/screen/schedule_screen.dart';
 
+// 홈 화면 정의
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -13,6 +14,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  // 현재 선택된 날짜를 저장하는 변수 (기본값은 오늘 날짜)
   DateTime selectedDate = DateTime.utc(
     DateTime.now().year,
     DateTime.now().month,
@@ -60,11 +62,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
           title: const Text("Nano Calendar"),
-          foregroundColor: const Color(0xFFFFFFFF),
-          backgroundColor: const Color(0xFF1976D2)),
+          foregroundColor: const Color(0xFFFFFFFF), // 글자색 흰색
+          backgroundColor: const Color(0xFF1976D2)), // 앱바 배경색 파란색
       body: SafeArea(
           child: Column(
             children: [
+              // 캘린더 화면 위젯 포함 (날짜 선택 기능 포함)
               CalendarScreen(
                 selectedDate: selectedDate,
                 onDaySelected: onDaySelected,
@@ -72,18 +75,17 @@ class _HomeScreenState extends State<HomeScreen> {
               // 선택된 날짜의 스케줄 표시
               Expanded(
                 child: ListView.builder(
-                  itemCount: filteredSchedules.length,
+                  itemCount: filteredSchedules.length, // 필터된 스케줄 수만큼 표시
                   itemBuilder: (context, index) {
                     final schedule = filteredSchedules[index];
                     return Slidable(
                       key: Key(schedule['content']),
                       startActionPane: ActionPane(
-                        motion: const DrawerMotion(),
+                        motion: const DrawerMotion(), // 스와이프 모션 설정
                         children: [
                           SlidableAction(
                             onPressed: (context) {
                               // 편집 동작
-                              print(schedule);
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -145,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
           )
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF1976D2),
+        backgroundColor: const Color(0xFF1976D2), // 플로팅 버튼 색상 설정
         onPressed: () async {
           // AddSchedule 화면에서 데이터를 받아옴
           final newSchedule = await Navigator.push(
@@ -162,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         child: const Icon(
           Icons.add,
-          color: Color(0xFFFFFFFF),
+          color: Color(0xFFFFFFFF), // 아이콘 색상 흰색
         ),
       ),
       drawer: Drawer(
@@ -171,18 +173,18 @@ class _HomeScreenState extends State<HomeScreen> {
             const UserAccountsDrawerHeader(
               accountName: Text("Name"),
               accountEmail: Text("accountEmail"),
-              decoration: BoxDecoration(color: Color(0xFF1976D2)),
+              decoration: BoxDecoration(color: Color(0xFF1976D2)), // 드로어 헤더 배경색 파란색
             ),
             ListTile(
               leading: const Icon(Icons.calendar_month),
-              iconColor: const Color(0xFF1976D2),
+              iconColor: const Color(0xFF1976D2), // 아이콘 색상 설정
               focusColor: const Color(0xFF1976D2),
               title: const Text('월간 달력'),
               onTap: () {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const HomeScreen()));
+                        builder: (context) => const HomeScreen())); // 월간 달력 화면으로 이동
               },
               trailing: const Icon(Icons.navigate_next),
             ),
@@ -195,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => TimeboxScreen(schedules: schedules)));
+                        builder: (context) => TimeboxScreen(schedules: schedules))); // 주간 타임박스 화면으로 이동
               },
               trailing: const Icon(Icons.navigate_next),
             )
@@ -205,9 +207,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // 날짜 선택 시 호출되는 함수
   void onDaySelected(DateTime selectedDate, DateTime focusedDate) {
     setState(() {
-      this.selectedDate = selectedDate;
+      this.selectedDate = selectedDate; // 선택된 날짜로 업데이트
     });
   }
 }
