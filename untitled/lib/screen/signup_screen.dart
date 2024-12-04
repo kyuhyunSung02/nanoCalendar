@@ -1,4 +1,3 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../widgets/custom_button.dart';
@@ -44,14 +43,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       setState(() {
         _isLoading = false;
       });
-
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       appBar: AppBar(
         title: const Text("Sign Up"),
         backgroundColor: const Color(0xFF1976D2),
@@ -64,22 +61,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Image.asset(
-                  'assets/whale.png',
-                  height: 150,
-                ),
                 const SizedBox(height: 20),
                 TextFormField(
                   controller: _nameController,
                   decoration: InputDecoration(
-                    labelText: "Name",
+                    hintText: "Enter Nickname",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your name';
+                      return 'Please enter your nickname';
                     }
                     return null;
                   },
@@ -88,7 +81,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(
-                    labelText: "Email",
+                    hintText: "example@gmail.com",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
@@ -105,7 +98,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   controller: _passwordController,
                   obscureText: true,
                   decoration: InputDecoration(
-                    labelText: "Password",
+                    hintText: "Enter Password",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
@@ -113,11 +106,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your password';
+                    } else if (value.length < 7) {
+                      return 'Password must be at least 7 characters long';
+                    } else if (!RegExp(r'^(?=.*[a-zA-Z])(?=.*\d)')
+                        .hasMatch(value)) {
+                      return 'Password must include both letters and numbers';
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 20),
+                const Text(
+                  "At least 7 characters including English letters and numbers",
+                  style: TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 10),
                 if (_isLoading)
                   const CircularProgressIndicator()
                 else
