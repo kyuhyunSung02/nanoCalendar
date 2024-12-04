@@ -14,6 +14,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
@@ -52,16 +54,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
       appBar: AppBar(
         title: const Text("Sign Up"),
         backgroundColor: const Color(0xFF1976D2),
+        titleTextStyle: const TextStyle(color: Colors.white),
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const SizedBox(height: 20),
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 20), // 화면 상단과의 여백
                 TextFormField(
                   controller: _nameController,
                   decoration: InputDecoration(
@@ -77,7 +81,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 10), // 여백 추가
                 TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(
@@ -93,7 +97,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 10), // 여백 추가
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
@@ -115,12 +119,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10), // 여백 추가
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    hintText: "Confirm Password",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please confirm your password';
+                    } else if (value != _passwordController.text) {
+                      return 'Passwords do not match';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 10), // 여백 추가
                 const Text(
                   "At least 7 characters including English letters and numbers",
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(color: Color.fromARGB(255, 112, 112, 112)),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 5), // 여백 추가
                 if (_isLoading)
                   const CircularProgressIndicator()
                 else
@@ -133,21 +156,33 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       }
                     },
                   ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Already have an account?"),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text("Login"),
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF1976D2),
+                const SizedBox(height: 10), // 여백 추가
+                CustomButton(
+                  text: "Go to Login",
+                  color: const Color(0xFF1976D2),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20), // 여백 추가
+                const Text.rich(
+                  TextSpan(
+                    text: 'By clicking Sign up, you agree to our ',
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: 'Terms',
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                    ),
-                  ],
+                      TextSpan(
+                        text: ' of Service',
+                      ),
+                    ],
+                  ),
+                  style: TextStyle(color: Colors.black),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
