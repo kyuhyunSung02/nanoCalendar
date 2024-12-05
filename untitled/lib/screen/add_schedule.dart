@@ -1,4 +1,3 @@
-// screens/add_schedule.dart
 // 필요한 Flutter 및 Firebase 관련 패키지 임포트
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,6 +9,7 @@ import 'home_screen.dart';
 
 // 일정 추가 화면 위젯 클래스 정의
 class AddSchedule extends StatefulWidget {
+  // 선택된 날짜와 기존 일정 정보를 매개변수로 받음
   final DateTime selectedDate; // 선택된 날짜
   final Map<String, dynamic>? existingSchedule; // 기존 일정 정보, 없을 수도 있음 (null 허용)
 
@@ -29,25 +29,26 @@ class _AddScheduleState extends State<AddSchedule> {
   late Color? selectedColor; // 선택된 색상
   late bool isDailyRoutineEnabled; // 하루 종일 여부
 
-
   @override
   void initState() {
     super.initState();
 
+    // 기존 일정이 있는 경우 해당 데이터를 사용해 초기화
     if (widget.existingSchedule != null) {
       final schedule = widget.existingSchedule!;
-      scheduleTitle = schedule['content'] ?? '';
+      scheduleTitle = schedule['content'] ?? ''; // 일정 제목
       morningTime = schedule['startTime'] is String
-          ? FirestoreService().parseTime(schedule['startTime'])
+          ? FirestoreService().parseTime(schedule['startTime']) // 문자열로 저장된 시간 파싱
           : schedule['startTime'] ?? TimeOfDay(hour: 6, minute: 0);
       afternoonTime = schedule['endTime'] is String
           ? FirestoreService().parseTime(schedule['endTime'])
           : schedule['endTime'] ?? TimeOfDay(hour: 18, minute: 0);
-      isAlarmEnabled = schedule['isAlarmEnabled'] ?? false;
-      memo = schedule['memo'] ?? '';
-      selectedColor = schedule['color'] != null ? Color(schedule['color']) : Colors.blue;
-      isDailyRoutineEnabled = schedule['isDailyRoutineEnabled'] ?? false;
+      isAlarmEnabled = schedule['isAlarmEnabled'] ?? false; // 알람 설정 여부
+      memo = schedule['memo'] ?? ''; // 메모
+      selectedColor = schedule['color'] != null ? Color(schedule['color']) : Colors.blue; // 일정 색상
+      isDailyRoutineEnabled = schedule['isDailyRoutineEnabled'] ?? false; // 하루 종일 여부
     } else {
+      // 새로운 일정 추가 시 기본값 설정
       scheduleTitle = '';
       morningTime = TimeOfDay(hour: 8, minute: 30);
       afternoonTime = TimeOfDay(hour: 14, minute: 30);
@@ -159,9 +160,9 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
     if (picked != null) {
       setState(() {
         if (isMorning) {
-          morningTime = picked;
+          morningTime = picked; // 시작 시간 업데이트
         } else {
-          afternoonTime = picked;
+          afternoonTime = picked; // 종료 시간 업데이트
         }
 
         // 변경된 일정 데이터를 상위 위젯으로 전달
@@ -178,6 +179,7 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
     }
   }
 
+  // 화면 UI 빌드
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -264,7 +266,7 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
                         children: [
                           Text('시작', style: TextStyle(fontSize: 16)),
                           ElevatedButton(
-                            onPressed: () => _selectTime(context, true),
+                            onPressed: () => _selectTime(context, true), // 시작 시간 선택 버튼
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                             ),
@@ -276,7 +278,7 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
                         children: [
                           Text('종료', style: TextStyle(fontSize: 16)),
                           ElevatedButton(
-                            onPressed: () => _selectTime(context, false),
+                            onPressed: () => _selectTime(context, false), // 종료 시간 선택 버튼
                             style: ElevatedButton.styleFrom(
                               padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                             ),
@@ -325,7 +327,7 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
 
               // 메모 입력 필드
               TextField(
-                controller: memoController,
+                controller: memoController, // 메모 입력 컨트롤러 연결
                 decoration: InputDecoration(
                   labelText: '메모',
                   icon: Icon(Icons.note),
@@ -439,26 +441,23 @@ class _RoutineSettingsScreenState extends State<RoutineSettingsScreen> {
                       text: '확인',
                       onPressed: () async {
                         if (scheduleTitle.isEmpty) {
+                          // 일정 제목이 비어 있는 경우 경고 메시지 표시
                           ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('일정 제목을 입력해주세요.')));
                         } else {
                           // Firestore 데이터 저장 예시
                           final updatedSchedule = {
-                            'date': DateFormat('yyyy-MM-dd').format(selectedDate.toLocal()),
-                            'startTime': '${morningTime.hour}:${morningTime.minute}',
-                            'endTime': '${afternoonTime.hour}:${afternoonTime.minute}',
-                            'content': scheduleTitle,
-                            'memo': memo,
-                            'isAlarmEnabled': isAlarmEnabled,
-                            'color': selectedColor?.value ?? Colors.blue.value,
-                            'isDailyRoutineEnabled': isDailyRoutineEnabled,
+                            'date': DateFormat('yyyy-MM-dd').format(selectedDate.toLocal()), // 날짜 형식 변환
+                            'startTime': '${morningTime.hour}:${morningTime.minute}', // 시작 시간 설정
+                            'endTime': '${afternoonTime.hour}:${afternoonTime.minute}', // 종료 시간 설정
+                            'content': scheduleTitle, // 일정 제목 설정
+                            'memo': memo, // 메모 설정
+                            'isAlarmEnabled': isAlarmEnabled, // 알람 설정 여부
+                            'color': selectedColor?.value ?? Colors.blue.value, // 선택된 색상
+                            'isDailyRoutineEnabled': isDailyRoutineEnabled, // 하루 종일 여부 설정
                           };
 
-
-
-
-
-                          await FirestoreService().saveSchedule(updatedSchedule);
+                          await FirestoreService().saveSchedule(updatedSchedule); // Firestore에 일정 저장
 
                           Navigator.pop(context, updatedSchedule); // 수정된 일정 반환
                         }
@@ -499,14 +498,14 @@ class ColorOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: onTap, // 터치 시 호출되는 콜백
       child: Container(
         height: 40,
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(8),
           border: isSelected
-              ? Border.all(color: Colors.black, width: 2)
+              ? Border.all(color: Colors.black, width: 2) // 선택된 색상일 경우 테두리 표시
               : null,
         ),
       ),
@@ -514,26 +513,42 @@ class ColorOption extends StatelessWidget {
   }
 }
 
+// Firestore와 상호작용을 위한 서비스 클래스 정의
 class FirestoreService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance; // Firestore 인스턴스 생성
 
   // 일정 데이터 저장 메서드 (사용자별로 저장)
-  Future<void> saveSchedule(Map<String, dynamic> scheduleData) async {
+  Future<bool> saveSchedule(Map<String, dynamic> scheduleData) async {
     try {
-      final user = FirebaseAuth.instance.currentUser; // 현재 로그인한 사용자 가져오기
+      final user = FirebaseAuth.instance.currentUser; // 현재 로그인한 사용자
       if (user != null) {
-        // 사용자의 UID를 이용해 Firestore 경로 설정
+        // 시간 범위 겹침을 확인하는 쿼리
+        final querySnapshot = await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('schedules')
+            .where('date', isEqualTo: scheduleData['date'])
+            .where('startTime', isLessThan: scheduleData['endTime'])
+            .where('endTime', isGreaterThan: scheduleData['startTime'])
+            .get();
+
+        if (querySnapshot.docs.isNotEmpty) {
+          // 겹치는 시간대의 일정이 존재함
+          return false;
+        }
+
+        // Firestore에 일정 데이터 저장
         await _firestore
-            .collection('users') // 모든 사용자를 담는 컬렉션
-            .doc(user.uid) // 현재 사용자의 문서
-            .collection('schedules') // 사용자별 일정 컬렉션
-            .add(scheduleData); // 일정 데이터를 Firestore에 저장
-        print("일정 저장 성공!");
-      } else {
-        print("사용자가 로그인되어 있지 않습니다.");
+            .collection('users')
+            .doc(user.uid)
+            .collection('schedules')
+            .add(scheduleData);
+        return true;
       }
+      return false;
     } catch (e) {
-      print("일정 저장 실패: $e");
+      print("일정 저장 실패: $e"); // 오류 발생 시 출력
+      return false;
     }
   }
 
@@ -562,7 +577,7 @@ class FirestoreService {
             .doc(user.uid)
             .collection('schedules')
             .doc(id)
-            .update(data);
+            .update(data); // 일정 데이터 업데이트
         print("일정 업데이트 성공!");
       } catch (e) {
         print("일정 업데이트 실패: $e");
@@ -582,7 +597,7 @@ class FirestoreService {
             .doc(user.uid)
             .collection('schedules')
             .doc(id)
-            .delete();
+            .delete(); // 일정 삭제
         print("일정 삭제 성공!");
       } catch (e) {
         print("일정 삭제 실패: $e");
@@ -597,32 +612,6 @@ class FirestoreService {
     final parts = timeString.split(':');
     final hour = int.parse(parts[0]);
     final minute = int.parse(parts[1]);
-    return TimeOfDay(hour: hour, minute: minute);
+    return TimeOfDay(hour: hour, minute: minute); // 시간 문자열을 TimeOfDay 객체로 변환
   }
 }
-
-
-/*
-1. Firebase Firestore와의 상호작용을 위해 먼저 FirebaseFirestore 인스턴스를 생성합니다.
-   `final FirebaseFirestore _firestore = FirebaseFirestore.instance;`
-
-2. saveSchedule 함수는 비동기 방식으로 작성되어, 일정 데이터를 저장하기 위해 `Future<void>` 형식을 반환합니다.
-   즉, 이 함수는 Firestore에 데이터가 저장되길 기다려야 하며, 비동기로 처리되어 나머지 앱 흐름을 방해하지 않습니다.
-
-3. Firestore 데이터베이스의 "schedules"라는 컬렉션에 새로운 문서를 추가합니다.
-   `await _firestore.collection('schedules').add(scheduleData);`
-   - `collection('schedules')`: Firestore의 "schedules" 컬렉션에 접근합니다. 이 컬렉션이 이미 존재하지 않으면 Firestore에서 자동으로 생성됩니다.
-   - `add(scheduleData)`: 전달된 scheduleData를 Firestore에 새 문서로 추가합니다.
-     - `scheduleData`는 일정 데이터를 포함하는 Map 형태이며, 이 데이터는 다음과 같은 필드를 포함합니다:
-       - 'date': 일정 날짜 (형식: "yyyy-MM-dd", 예: "2024-12-04")
-       - 'startTime': 일정 시작 시간 (형식: "오전 8:30" 또는 "오후 2:30" 등, 로컬 형식으로 표시)
-       - 'endTime': 일정 종료 시간 (형식: "오후 6:00" 등)
-       - 'content': 일정 제목 (예: "프로젝트 회의")
-       - 'memo': 메모 내용 (예: "회의 준비 자료 필요")
-       - 'isAlarmEnabled': 알람 설정 여부 (Boolean 값, 예: true/false)
-       - 'color': 일정의 색상 코드 (정수 값, 예: Colors.blue.value)
-       - 'isDailyRoutineEnabled': 하루 종일 설정 여부 (Boolean 값)
-
-4. 데이터가 정상적으로 Firestore에 저장되면 "데이터 저장 성공!"이라는 메시지가 출력되고, 오류가 발생할 경우 catch 블록에서 해당 오류 메시지를 출력합니다.
-   `print("데이터 저장 실패: $e");`
-*/
