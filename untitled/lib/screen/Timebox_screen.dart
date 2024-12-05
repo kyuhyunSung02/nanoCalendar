@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // FirebaseAuth 임포트 필요
 
 class TimeboxScreen extends StatelessWidget {
   const TimeboxScreen({Key? key}) : super(key: key);
@@ -34,8 +35,21 @@ class TimeboxScreen extends StatelessWidget {
     );
   }
 
+  // Firestore에서 현재 로그인된 사용자의 일정 데이터를 가져오는 메서드
   Future<List<Map<String, dynamic>>> _fetchSchedulesFromFirestore() async {
-    final snapshot = await FirebaseFirestore.instance.collection('schedules').get();
+    final user = FirebaseAuth.instance.currentUser; // 현재 로그인된 사용자 가져오기
+    if (user == null) {
+      // 사용자가 로그인되어 있지 않은 경우 빈 리스트 반환
+      return [];
+    }
+
+    // Firestore에서 현재 로그인한 사용자의 일정 데이터를 가져옴
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid) // 사용자 UID를 사용하여 사용자별 데이터 접근
+        .collection('schedules') // 사용자별 일정 컬렉션
+        .get();
+
     return snapshot.docs.map((doc) {
       final data = doc.data();
       return {
@@ -48,6 +62,7 @@ class TimeboxScreen extends StatelessWidget {
     }).toList();
   }
 
+  // 일정 데이터를 가져와서 Meeting 형식으로 변환하는 메서드
   List<Meeting> _getDataSource(List<Map<String, dynamic>> schedules) {
     final List<Meeting> meetings = <Meeting>[];
 
@@ -113,37 +128,39 @@ class TimeboxScreen extends StatelessWidget {
   }
 }
 
+// Meeting 클래스 정의
+class Meeting {
+  Meeting(this.eventName, this.from, this.to, this.background);
+
+  String eventName; // 일정 제목
+  DateTime from;    // 일정 시작 시간
+  DateTime to;      // 일정 종료 시간
+  Color background; // 일정 배경 색상
+}
+
+// MeetingDataSource 클래스 정의
 class MeetingDataSource extends CalendarDataSource {
   MeetingDataSource(List<Meeting> source) {
-    appointments = source;
+    appointments = source; // 일정 데이터를 넘겨줌
   }
 
   @override
   DateTime getStartTime(int index) {
-    return appointments![index].from;
+    return appointments![index].from; // 일정 시작 시간 반환
   }
 
   @override
   DateTime getEndTime(int index) {
-    return appointments![index].to;
+    return appointments![index].to; // 일정 종료 시간 반환
   }
 
   @override
   String getSubject(int index) {
-    return appointments![index].eventName;
+    return appointments![index].eventName; // 일정 제목 반환
   }
 
   @override
   Color getColor(int index) {
-    return appointments![index].background;
+    return appointments![index].background; // 일정 배경 색상 반환
   }
-}
-
-class Meeting {
-  Meeting(this.eventName, this.from, this.to, this.background);
-
-  String eventName;
-  DateTime from;
-  DateTime to;
-  Color background;
 }

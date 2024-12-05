@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart'; // 텍스트 입력 제어를 위해 추가
 import 'package:intl/intl.dart'; // 날짜 형식 변경을 위해 추가
 import '../widgets/custom_button.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'home_screen.dart';
 
 // 일정 추가 화면 위젯 클래스 정의
@@ -516,45 +517,87 @@ class ColorOption extends StatelessWidget {
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // 일정 데이터 저장 메서드
+  // 일정 데이터 저장 메서드 (사용자별로 저장)
   Future<void> saveSchedule(Map<String, dynamic> scheduleData) async {
     try {
-      await _firestore.collection('schedules').add(scheduleData); // 일정 데이터를 Firestore에 저장
-      print("일정 저장 성공!");
+      final user = FirebaseAuth.instance.currentUser; // 현재 로그인한 사용자 가져오기
+      if (user != null) {
+        // 사용자의 UID를 이용해 Firestore 경로 설정
+        await _firestore
+            .collection('users') // 모든 사용자를 담는 컬렉션
+            .doc(user.uid) // 현재 사용자의 문서
+            .collection('schedules') // 사용자별 일정 컬렉션
+            .add(scheduleData); // 일정 데이터를 Firestore에 저장
+        print("일정 저장 성공!");
+      } else {
+        print("사용자가 로그인되어 있지 않습니다.");
+      }
     } catch (e) {
       print("일정 저장 실패: $e");
     }
   }
 
-  // 일정 데이터를 실시간으로 가져오는 메서드
+  // 사용자별 일정 데이터를 실시간으로 가져오는 메서드
   Stream<QuerySnapshot> getSchedulesStream() {
-    return _firestore.collection('schedules').snapshots();
+    final user = FirebaseAuth.instance.currentUser; // 현재 로그인한 사용자 가져오기
+    if (user != null) {
+      return _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('schedules')
+          .snapshots();
+    } else {
+      // 사용자가 로그인되어 있지 않으면 빈 스트림을 반환
+      return const Stream.empty();
+    }
   }
 
   // 일정 업데이트 메서드
   Future<void> updateSchedule(String id, Map<String, dynamic> data) async {
-    try {
-      await _firestore.collection('schedules').doc(id).update(data);
-      print("일정 업데이트 성공!");
-    } catch (e) {
-      print("일정 업데이트 실패: $e");
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('schedules')
+            .doc(id)
+            .update(data);
+        print("일정 업데이트 성공!");
+      } catch (e) {
+        print("일정 업데이트 실패: $e");
+      }
+    } else {
+      print("사용자가 로그인되어 있지 않습니다.");
     }
   }
+
+  // 일정 삭제 메서드
+  Future<void> deleteSchedule(String id) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('schedules')
+            .doc(id)
+            .delete();
+        print("일정 삭제 성공!");
+      } catch (e) {
+        print("일정 삭제 실패: $e");
+      }
+    } else {
+      print("사용자가 로그인되어 있지 않습니다.");
+    }
+  }
+
+  // 시간 문자열을 TimeOfDay로 변환하는 메서드
   TimeOfDay parseTime(String timeString) {
     final parts = timeString.split(':');
     final hour = int.parse(parts[0]);
     final minute = int.parse(parts[1]);
     return TimeOfDay(hour: hour, minute: minute);
-  }
-
-  // 일정 삭제 메서드
-  Future<void> deleteSchedule(String id) async {
-    try {
-      await _firestore.collection('schedules').doc(id).delete();
-      print("일정 삭제 성공!");
-    } catch (e) {
-      print("일정 삭제 실패: $e");
-    }
   }
 }
 

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:untitled/screen/Timebox_screen.dart';
 import 'package:untitled/screen/add_schedule.dart';
 import 'package:untitled/screen/calendar_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'schedule_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -27,17 +28,29 @@ class _HomeScreenState extends State<HomeScreen> {
   );
 
   // Firestore에서 일정 데이터를 가져오는 Stream
+// Firestore에서 현재 로그인한 사용자의 일정 데이터를 가져오는 Stream
   Stream<List<Map<String, dynamic>>> _fetchSchedules() {
-    return FirebaseFirestore.instance.collection('schedules').snapshots().map(
-          (snapshot) {
+    final user = FirebaseAuth.instance.currentUser; // 현재 로그인한 사용자 가져오기
+    if (user != null) {
+      // 사용자의 UID를 사용하여 Firestore 경로 설정
+      return FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid) // 사용자 문서 참조
+          .collection('schedules') // 사용자별 일정 컬렉션
+          .snapshots()
+          .map((snapshot) {
         return snapshot.docs.map((doc) {
           final data = doc.data();
           data['id'] = doc.id; // 문서 ID 추가
           return data as Map<String, dynamic>;
         }).toList();
-      },
-    );
+      });
+    } else {
+      // 사용자가 로그인되지 않았을 경우 빈 Stream 반환
+      return Stream.value([]);
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -101,28 +114,33 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             SlidableAction(
                               onPressed: (context) {
-                                // 일정 수정
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        AddSchedule(
-                                          selectedDate: selectedDate,
-                                          existingSchedule: {
-                                            ...schedule,
-                                            'startTime': _parseTime(
-                                                schedule['startTime']),
-                                            'endTime': _parseTime(
-                                                schedule['endTime']),
-                                          },
-                                        ),
+                                    builder: (context) => AddSchedule(
+                                      selectedDate: selectedDate,
+                                      existingSchedule: {
+                                        ...schedule,
+                                        'startTime': _parseTime(schedule['startTime']),
+                                        'endTime': _parseTime(schedule['endTime']),
+                                      },
+                                    ),
                                   ),
                                 ).then((updatedSchedule) {
                                   if (updatedSchedule != null) {
-                                    FirebaseFirestore.instance
-                                        .collection('schedules')
-                                        .doc(schedule['id'])
-                                        .update(updatedSchedule);
+                                    final user = FirebaseAuth.instance.currentUser;
+                                    if (user != null) {
+                                      FirebaseFirestore.instance
+                                          .collection('users')
+                                          .doc(user.uid)
+                                          .collection('schedules')
+                                          .doc(schedule['id'])
+                                          .update(updatedSchedule);
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text("로그인이 필요합니다.")),
+                                      );
+                                    }
                                   }
                                 });
                               },
@@ -137,11 +155,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             SlidableAction(
                               onPressed: (context) {
-                                // 일정 삭제
-                                FirebaseFirestore.instance
-                                    .collection('schedules')
-                                    .doc(schedule['id'])
-                                    .delete();
+                                final user = FirebaseAuth.instance.currentUser;
+                                if (user != null) {
+                                  FirebaseFirestore.instance
+                                      .collection('users')
+                                      .doc(user.uid)
+                                      .collection('schedules')
+                                      .doc(schedule['id'])
+                                      .delete();
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text("로그인이 필요합니다.")),
+                                  );
+                                }
                               },
                               backgroundColor: Colors.red,
                               icon: Icons.delete,
@@ -174,25 +200,38 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF1976D2),
-        onPressed: () async {
-          // AddSchedule 화면에서 데이터를 받아 Firestore에 저장
-          final newSchedule = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddSchedule(selectedDate: selectedDate),
-            ),
-          );
-          if (newSchedule != null) {
-            FirebaseFirestore.instance.collection('schedules').add(newSchedule);
-          }
-        },
-        child: const Icon(
-          Icons.add,
-          color: Color(0xFFFFFFFF),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: const Color(0xFF1976D2),
+          onPressed: () async {
+            // AddSchedule 화면에서 데이터를 받아 Firestore에 저장
+            final newSchedule = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddSchedule(selectedDate: selectedDate),
+              ),
+            );
+            if (newSchedule != null) {
+              final user = FirebaseAuth.instance.currentUser;
+              if (user != null) {
+                FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(user.uid)
+                    .collection('schedules')
+                    .add(newSchedule);
+              } else {
+                // 로그인되지 않은 경우 처리 (필요 시)
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("로그인이 필요합니다.")),
+                );
+              }
+            }
+          },
+          child: const Icon(
+            Icons.add,
+            color: Color(0xFFFFFFFF),
+          ),
         ),
-      ),
+
       drawer: Drawer(
         child: ListView(
           children: [
