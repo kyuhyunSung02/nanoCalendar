@@ -213,19 +213,20 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               trailing: const Icon(Icons.navigate_next),
             ),
-            ListTile(
-              leading: const Icon(Icons.calendar_view_week),
-              iconColor: const Color(0xFF1976D2),
-              title: const Text('주간 타임박스'),
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            TimeboxScreen(schedules: []))); // 전달할 데이터
-              },
-              trailing: const Icon(Icons.navigate_next),
+      ListTile(
+        leading: const Icon(Icons.calendar_view_week),
+        iconColor: const Color(0xFF1976D2),
+        title: const Text('주간 타임박스'),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const TimeboxScreen(),
             ),
+          );
+        },
+        trailing: const Icon(Icons.navigate_next),
+      ),
           ],
         ),
       ),
