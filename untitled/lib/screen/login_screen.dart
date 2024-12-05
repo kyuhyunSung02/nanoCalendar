@@ -7,7 +7,6 @@ import '../widgets/custom_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
-
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -30,14 +29,28 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => HomeScreen()));
     } on FirebaseAuthException catch (e) {
-      String errorMessage = "An error occurred";
+      String errorMessage = "로그인 정보가 틀립니다";
       if (e.code == 'user-not-found') {
-        errorMessage = "No user found with this email";
+        errorMessage = "로그인 정보가 틀립니다";
       } else if (e.code == 'wrong-password') {
-        errorMessage = "Wrong password";
+        errorMessage = "패스워드 정보가 틀립니다";
       }
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(errorMessage)));
+
+      // Blue rectangular snackbar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            errorMessage,
+            style: TextStyle(color: Colors.white),
+            textAlign: TextAlign.center,
+          ),
+          backgroundColor: Colors.blue,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          duration: Duration(seconds: 2),
+        ),
+      );
     } finally {
       setState(() {
         _isLoading = false;
