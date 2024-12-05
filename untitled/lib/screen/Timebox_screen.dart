@@ -40,15 +40,9 @@ class TimeboxScreen extends StatelessWidget {
       final data = doc.data();
       return {
         'content': data['content'],
-        'date': DateTime.parse(data['date']), // "2024-12-05"
-        'startTime': TimeOfDay(
-          hour: int.parse(data['startTime'].split(':')[0]),
-          minute: int.parse(data['startTime'].split(':')[1]),
-        ),
-        'endTime': TimeOfDay(
-          hour: int.parse(data['endTime'].split(':')[0]),
-          minute: int.parse(data['endTime'].split(':')[1]),
-        ),
+        'date': DateTime.parse(data['date']),
+        'startTime': _parseTime(data['startTime']),
+        'endTime': _parseTime(data['endTime']),
         'color': Color(data['color']),
       };
     }).toList();
@@ -82,6 +76,40 @@ class TimeboxScreen extends StatelessWidget {
       );
     }
     return meetings;
+  }
+
+  TimeOfDay _parseTime(dynamic time) {
+    try {
+      if (time is Timestamp) {
+        // Timestamp를 DateTime으로 변환 후 TimeOfDay로 변환
+        return TimeOfDay.fromDateTime(time.toDate());
+      } else if (time is String) {
+        // 'HH:mm AM/PM' 형식의 문자열 처리
+        final timeParts = time.trim().split(' ');
+        final hourMinuteParts = timeParts[0].split(':');
+        int hour = int.parse(hourMinuteParts[0]);
+        final int minute = int.parse(hourMinuteParts[1]);
+
+        // AM/PM 처리
+        if (timeParts.length == 2) {
+          final period = timeParts[1].toUpperCase();
+          if (period == 'PM' && hour != 12) {
+            hour += 12;
+          } else if (period == 'AM' && hour == 12) {
+            hour = 0;
+          }
+        }
+
+        return TimeOfDay(hour: hour, minute: minute);
+      } else {
+        // 기본값 반환
+        return const TimeOfDay(hour: 0, minute: 0);
+      }
+    } catch (e) {
+      // 예외 발생 시 기본값 반환
+      print('Error parsing time: $time, $e');
+      return const TimeOfDay(hour: 0, minute: 0);
+    }
   }
 }
 
