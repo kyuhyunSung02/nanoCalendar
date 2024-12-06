@@ -54,6 +54,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser; // 로그인된 사용자 정보
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Nano Calendar"),
@@ -235,9 +237,9 @@ class _HomeScreenState extends State<HomeScreen> {
       drawer: Drawer(
         child: ListView(
           children: [
-            const UserAccountsDrawerHeader(
-              accountName: Text("Name"),
-              accountEmail: Text("accountEmail"),
+            UserAccountsDrawerHeader(
+              accountName: Text(user?.displayName ?? '이름 없음'),
+              accountEmail: Text(user?.email ?? '이메일 없음'),
               decoration: BoxDecoration(color: Color(0xFF1976D2)),
             ),
             ListTile(
@@ -252,23 +254,24 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               trailing: const Icon(Icons.navigate_next),
             ),
-      ListTile(
-        leading: const Icon(Icons.calendar_view_week),
-        iconColor: const Color(0xFF1976D2),
-        title: const Text('주간 타임박스'),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const TimeboxScreen(),
+            ListTile(
+              leading: const Icon(Icons.calendar_view_week),
+              iconColor: const Color(0xFF1976D2),
+              title: const Text('주간 타임박스'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TimeboxScreen(),
+                  ),
+                );
+              },
+              trailing: const Icon(Icons.navigate_next),
             ),
-          );
-        },
-        trailing: const Icon(Icons.navigate_next),
-      ),
           ],
         ),
-      ),
+      )
+,
     );
   }
 
