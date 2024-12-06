@@ -64,6 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         title: const Text("Welcome to Nano Calendar"),
         backgroundColor: const Color(0xFF1976D2),
+        titleTextStyle: const TextStyle(color: Colors.white),
       ),
       body: Center(
         child: SingleChildScrollView(

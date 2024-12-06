@@ -49,6 +49,7 @@ class _FindPasswordScreenState extends State<FindPasswordScreen> {
       appBar: AppBar(
         title: const Text("Find Password"),
         backgroundColor: const Color(0xFF1976D2),
+        titleTextStyle: const TextStyle(color: Colors.white),
       ),
       body: Center(
         child: SingleChildScrollView(
