@@ -49,6 +49,7 @@ class _FindPasswordScreenState extends State<FindPasswordScreen> {
       appBar: AppBar(
         title: const Text("Find Password"),
         backgroundColor: const Color(0xFF1976D2),
+        titleTextStyle: const TextStyle(color: Colors.white),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -58,10 +59,6 @@ class _FindPasswordScreenState extends State<FindPasswordScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Image.asset(
-                  'assets/whale.png',
-                  height: 150,
-                ),
                 const SizedBox(height: 20),
                 if (!_isEmailSent) ...[
                   const Text(
@@ -73,7 +70,7 @@ class _FindPasswordScreenState extends State<FindPasswordScreen> {
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      labelText: "Email",
+                      hintText: "example@gmail.com",
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
@@ -103,6 +100,10 @@ class _FindPasswordScreenState extends State<FindPasswordScreen> {
                     'Password reset email has been sent.\nPlease check your inbox.',
                     style: TextStyle(fontSize: 16, color: Colors.green),
                     textAlign: TextAlign.center,
+                  ),
+                  Image.asset(
+                    'assets/check.png',
+                    height: 150,
                   ),
                 ],
                 const SizedBox(height: 20),
