@@ -12,9 +12,11 @@
 - **직관적인 UI/UX**: 사용자 친화적인 인터페이스로 누구나 쉽게 사용할 수 있는 환경 구축
 
 ## 🧑‍💻 **Contributors**
-| 성규현 <br> [@dmp100](https://github.com/dmp100) | 이재욱<br> [@22-JWL](https://github.com/22-JWL) | 한승주 <br> [@eyeofsol](https://github.com/eyeofsol) | 고윤영 <br> [@koyy418](https://github.com/koyy418) |
+| 이재욱 <br> [@22-JWL](https://github.com/22-JWL) | 성규현 <br> [@dmp100](https://github.com/dmp100) | 한승주 <br> [@eyeofsol](https://github.com/eyeofsol) | 고윤영 <br> [@koyy418](https://github.com/koyy418) |
 |:---:|:---:|:---:|:---:|
-| <img width="150" alt="성규현" src="https://github.com/user-attachments/assets/6be11fa5-af14-41e3-aa71-db90749dcf2e" /> | <img width="150" alt="이재욱" src="https://github.com/user-attachments/assets/89929f1d-9874-4557-934e-364191a9cd8a" /> | <img width="150" alt="한승주" src="https://github.com/user-attachments/assets/461e239f-161c-429b-9a16-8a0ad0ec69ae" /> | <img width="150" alt="고윤영" src="https://github.com/user-attachments/assets/c9c4fdf3-8c5e-4b07-bc48-a6ef2d7a6502" /> |
+| <img width="200" src="https://github.com/user-attachments/assets/89929f1d-9874-4557-934e-364191a9cd8a"/> | <img width="200" src="https://github.com/user-attachments/assets/6be11fa5-af14-41e3-aa71-db90749dcf2e"/> | <img width="200" src="https://github.com/user-attachments/assets/461e239f-161c-429b-9a16-8a0ad0ec69ae"/> | <img width="200" src="https://github.com/user-attachments/assets/c9c4fdf3-8c5e-4b07-bc48-a6ef2d7a6502"/> |
+|`회원가입` `UI/UX` `인증 로직` | `로그인` `Firebase Database 연동` `데이터 처리` | `일간/월간 캘린더 뷰` `일정 표시 및 관리` | `타임박스(주간 뷰)` `시간별 일정 배치` `색상 구분`|
+
 
 ## ✨ **주요 기능**
 
